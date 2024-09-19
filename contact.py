@@ -9,10 +9,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-
 # Load environment variables from .env file
 load_dotenv()
-
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
@@ -21,6 +19,9 @@ def send_email():
     email = request.form.get('email')
     subject = request.form.get('subject')
     message = request.form.get('message')
+
+    # Debugging: Log the received data
+    print("Received data:", name, email, subject, message)
 
     # Email configuration
     smtp_server = os.getenv('SMTP_SERVER')
@@ -50,10 +51,10 @@ def send_email():
             server.starttls()
             server.login(smtp_user, smtp_password)
             server.send_message(msg)
-        return jsonify({'status': 'success', 'message': 'Email sent successfully.'})
+        return jsonify({'status': 'success', 'message': 'Email sent successfully.'}), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+        print(f"Error sending email: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
