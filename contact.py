@@ -12,6 +12,10 @@ CORS(app)
 # Load environment variables from .env file
 load_dotenv()
 
+@app.route('/')
+def home():
+    return "Welcome to the email service!"  # Root route response
+
 @app.route('/send-email', methods=['POST'])
 def send_email():
     # Extract form data
