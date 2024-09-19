@@ -37,7 +37,7 @@ def send_email():
     # Create a SendGrid email message
     msg = Mail(
         from_email=os.getenv('FROM_EMAIL'),
-        to_emails=os.getenv('TO_EMAIL'),  # Your destination email
+        to_emails=os.getenv('TO_EMAIL'),  # Ensure this is defined in your .env file
         subject=f'Contact Form Submission: {subject}',
         plain_text_content=email_content
     )
@@ -53,9 +53,8 @@ def send_email():
 
 @app.route('/test-email', methods=['GET'])
 def test_email():
-    # Test email sending logic (optional)
-    # This part can be similar to the send_email function
-    # You can implement it if needed.
+    # Optional: Implement a test email route if needed
+    return jsonify({'status': 'info', 'message': 'Test email endpoint not implemented.'}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
