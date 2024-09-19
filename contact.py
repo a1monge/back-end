@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
@@ -27,34 +26,26 @@ def send_email():
     # Debugging: Log the received data
     print("Received data:", name, email, subject, message)
 
-    # Email configuration
-    smtp_server = os.getenv('SMTP_SERVER')
-    smtp_port = int(os.getenv('SMTP_PORT'))  # Ensure it's an integer
-    smtp_user = os.getenv('SMTP_USER')
-    smtp_password = os.getenv('SMTP_PASSWORD')
-    from_email = os.getenv('FROM_EMAIL')
-    to_email = from_email  # Set recipient to your own email
-
     # Create email content
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = f'Contact Form Submission: {subject}'
-
-    body = f'''
+    email_content = f'''
     Name: {name}
     Email: {email}
     Subject: {subject}
     Message: {message}
     '''
-    msg.attach(MIMEText(body, 'plain'))
+
+    # Create a SendGrid email message
+    msg = Mail(
+        from_email=os.getenv('FROM_EMAIL'),
+        to_emails=os.getenv('TO_EMAIL'),  # Your destination email
+        subject=f'Contact Form Submission: {subject}',
+        plain_text_content=email_content
+    )
 
     try:
-        # Send email
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_password)
-            server.send_message(msg)
+        # Send email using SendGrid API
+        sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+        sg.send(msg)
         return jsonify({'status': 'success', 'message': 'Email sent successfully.'}), 200
     except Exception as e:
         print(f"Error sending email: {e}")
@@ -62,31 +53,9 @@ def send_email():
 
 @app.route('/test-email', methods=['GET'])
 def test_email():
-    smtp_server = os.getenv('SMTP_SERVER')
-    smtp_port = int(os.getenv('SMTP_PORT'))
-    smtp_user = os.getenv('SMTP_USER')
-    smtp_password = os.getenv('SMTP_PASSWORD')
-    from_email = os.getenv('FROM_EMAIL')
-    to_email = from_email  # Change this if needed
-
-    # Create test email content
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = 'Test Email'
-
-    body = 'This is a test email.'
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_password)
-            server.send_message(msg)
-        return jsonify({'status': 'success', 'message': 'Test email sent successfully.'}), 200
-    except Exception as e:
-        print(f"Error sending test email: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+    # Test email sending logic (optional)
+    # This part can be similar to the send_email function
+    # You can implement it if needed.
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
