@@ -29,11 +29,11 @@ def send_email():
 
     # Email configuration
     smtp_server = os.getenv('SMTP_SERVER')
-    smtp_port = os.getenv('SMTP_PORT')
+    smtp_port = int(os.getenv('SMTP_PORT'))  # Ensure it's an integer
     smtp_user = os.getenv('SMTP_USER')
     smtp_password = os.getenv('SMTP_PASSWORD')
     from_email = os.getenv('FROM_EMAIL')
-    to_email = os.getenv('FROM_EMAIL')  # Set recipient to your own email
+    to_email = from_email  # Set recipient to your own email
 
     # Create email content
     msg = MIMEMultipart()
@@ -58,6 +58,34 @@ def send_email():
         return jsonify({'status': 'success', 'message': 'Email sent successfully.'}), 200
     except Exception as e:
         print(f"Error sending email: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/test-email', methods=['GET'])
+def test_email():
+    smtp_server = os.getenv('SMTP_SERVER')
+    smtp_port = int(os.getenv('SMTP_PORT'))
+    smtp_user = os.getenv('SMTP_USER')
+    smtp_password = os.getenv('SMTP_PASSWORD')
+    from_email = os.getenv('FROM_EMAIL')
+    to_email = from_email  # Change this if needed
+
+    # Create test email content
+    msg = MIMEMultipart()
+    msg['From'] = from_email
+    msg['To'] = to_email
+    msg['Subject'] = 'Test Email'
+
+    body = 'This is a test email.'
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.send_message(msg)
+        return jsonify({'status': 'success', 'message': 'Test email sent successfully.'}), 200
+    except Exception as e:
+        print(f"Error sending test email: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
