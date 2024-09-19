@@ -17,11 +17,12 @@ def home():
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
-    # Extract form data
-    name = request.form.get('name')
-    email = request.form.get('email')
-    subject = request.form.get('subject')
-    message = request.form.get('message')
+    # Extract form data from JSON
+    data = request.get_json()  # Get JSON data
+    name = data.get('name')
+    email = data.get('email')
+    subject = data.get('subject')
+    message = data.get('message')
 
     # Debugging: Log the received data
     print("Received data:", name, email, subject, message)
@@ -53,7 +54,6 @@ def send_email():
 
 @app.route('/test-email', methods=['GET'])
 def test_email():
-    # Optional: Implement a test email route if needed
     return jsonify({'status': 'info', 'message': 'Test email endpoint not implemented.'}), 200
 
 if __name__ == '__main__':
